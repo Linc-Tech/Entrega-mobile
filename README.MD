@@ -4,7 +4,6 @@ Guia de instalação
 
 Para que o aplicativo rode corretamente é necessário fazer a configuração do backend anteriormente. Caso, você efetue algum passo de forma incorreta isso poderá acarretar em falhas durante a utilização da aplicação.
 
----
 
 ### Configuração do backend
 
@@ -23,7 +22,7 @@ O nosso backend conta com o uso de uma lib chamada “lombok” e, ela é config
 
 - O nosso projeto está sendo realizado em Maven, portanto, para importá-lo no IntelliJ é necessário encontrar o **pom.xml** da aplicação e selecioná-la, senão, a IDE não conseguirá baixar as dependências do Maven e reconhecê-lo como um projeto Maven.
 
-![Screnshot](../assests/fot-pom.png)
+<img width="479" alt="foto-pom" src="https://user-images.githubusercontent.com/61299646/136713290-f15b09a0-4cde-401f-b49b-d4c21727845d.png">
 
 #### Configurando o banco de dados
 
@@ -56,6 +55,5 @@ Para que os endpoints funcionem corretamente, eles esperam que os dados do CRUD 
 **ATENÇÃO**
 Não altere o “id” do corpo do request acima, ele que será utilizado para relacionar os objetos criados com um usuário existente.
 
----
 
 Agora é só rodar o frontend, baixar suas dependências com `npm i` e executar o projeto
