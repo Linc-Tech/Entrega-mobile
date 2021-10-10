@@ -57,3 +57,10 @@ Não altere o “id” do corpo do request acima, ele que será utilizado para r
 
 
 Agora é só rodar o frontend, baixar suas dependências com `npm i` e executar o projeto
+
+
+## Projeto
+
+https://user-images.githubusercontent.com/61299646/136713379-5ca2d9c3-e61e-4183-b3b8-062827b562c3.mp4
+
+
