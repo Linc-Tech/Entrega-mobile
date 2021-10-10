@@ -22,7 +22,7 @@ O nosso backend conta com o uso de uma lib chamada “lombok” e, ela é config
 
 - O nosso projeto está sendo realizado em Maven, portanto, para importá-lo no IntelliJ é necessário encontrar o **pom.xml** da aplicação e selecioná-la, senão, a IDE não conseguirá baixar as dependências do Maven e reconhecê-lo como um projeto Maven.
 
-<img width="479" alt="foto-pom" src="https://user-images.githubusercontent.com/61299646/136713290-f15b09a0-4cde-401f-b49b-d4c21727845d.png">
+   <img width="479" alt="foto-pom" src="https://user-images.githubusercontent.com/61299646/136713290-f15b09a0-4cde-401f-b49b-d4c21727845d.png">
 
 #### Configurando o banco de dados
 
