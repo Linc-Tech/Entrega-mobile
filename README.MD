@@ -18,7 +18,7 @@ O nosso backend conta com o uso de uma lib chamada “lombok” e, ela é config
 5. Clique em Open as Project
 6. E agora só aguarde as dependências serem baixadas (as vezes é comum aparecer um popup no canto inferior direito da tela pedindo sua permissão para instalar as dependências, rodar o projeto como Maven ou até mesmo para baixar a versão do Java que estamos utilizando caso, esteja rodando o projeto pela primeira vez)
 
-**Observações**
+   **Observações**
 
 - O nosso projeto está sendo realizado em Maven, portanto, para importá-lo no IntelliJ é necessário encontrar o **pom.xml** da aplicação e selecioná-la, senão, a IDE não conseguirá baixar as dependências do Maven e reconhecê-lo como um projeto Maven.
 
