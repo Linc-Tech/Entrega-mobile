@@ -1,4 +1,4 @@
-Guia de instalação
+# Guia de instalação
 
 ## Uso
 
