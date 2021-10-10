@@ -1,0 +1,3 @@
+[submodule "Backend/SofiaBag_Backend_Oficia"]
+	path = Backend/SofiaBag_Backend_Oficia
+	url = https://github.com/Linc-Tech/SofiaBag_Backend_Oficial
