@@ -33,31 +33,11 @@ O nosso backend conta com o uso de uma lib chamada “lombok” e, ela é config
    1. Caso utilize não utilize o servidor da FIAP, mude a `datasource.url` para a sua esperada.
 3. Rode o arquivo executável do projeto - `SofiaBagApplication`
 
-#### Criando um usuário
-
-Para que os endpoints funcionem corretamente, eles esperam que os dados do CRUD que irá testar, estejam relacionados com um usuário específico. Como na nossa aplicação frontend, o usuário está fixo, utilizando algum software de teste de API (Postman, Insomnia…), faça:
-
-1. Abra o Insomnia (ou qualquer outro de preferência)
-2. Crie um novo request do tipo `POST`
-3. Coloque essa url http://localhost:8082/api/v1/user
-4. E no body do request insira:
-
-```
-{
-    "id": "DJOI208",
-    "name": "Jason Le",
-    "nickname": "Jale",
-    "email": "jason_le@gmail.com",
-    "password": "password"
-}
-```
-
-5. Execute o request para criar seu usuário
 
 **ATENÇÃO**
 
-Não altere o “id” do corpo do request acima, ele que será utilizado para relacionar os objetos criados com um usuário existente.
-
+Para que os endpoints funcionem corretamente, eles esperam que os dados do CRUD que irá testar, estejam relacionados com um usuário específico. Além disso, também é necessário um usuário para você fazer o login na nosso app. Portanto, ao acessar a aplicação, clique em "Cadastrar" e após isso efetue o seu login.
+<img width="316" alt="Captura de Tela 2021-10-19 às 23 40 24" src="https://user-images.githubusercontent.com/61299646/138019147-a33db801-dc03-49de-bdc7-96c70d84cebe.png">
 
 Agora é só rodar o frontend, baixar suas dependências com `npm i` e executar o projeto
 
