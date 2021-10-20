@@ -6,14 +6,12 @@ import { COLORS, FONTS } from '../../../../constants/theme';
 import httpStatus from '../../../../data/httpStatus';
 import ComeBackButton from '../../../components/ComeBackButton';
 import LoadingSimbol from '../../../components/LoadingSimbol';
-import { signIn, validateLogin } from '../../../services/LoginService';
+import { signIn } from '../../../services/LoginService';
 
 import {
-  Container,
   Background,
   LoginSection,
   Footer,
-  InputSection,
   Header,
   Content,
   Title,
@@ -110,7 +108,6 @@ export default function Login({ navigation }) {
 
     setLoading(true);
     const res = await signIn(login);
-    console.log(res);
 
     if (res == httpStatus.SERVER_ERROR) {
       const nav = navigation.navigate("Exception", {
