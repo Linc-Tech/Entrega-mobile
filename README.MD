@@ -37,6 +37,7 @@ O nosso backend conta com o uso de uma lib chamada “lombok” e, ela é config
 **ATENÇÃO**
 
 Para que os endpoints funcionem corretamente, eles esperam que os dados do CRUD que irá testar, estejam relacionados com um usuário específico. Além disso, também é necessário um usuário para você fazer o login na nosso app. Portanto, ao acessar a aplicação, clique em "Cadastrar" e após isso efetue o seu login.
+<br>
 <img width="316" alt="Captura de Tela 2021-10-19 às 23 40 24" src="https://user-images.githubusercontent.com/61299646/138019147-a33db801-dc03-49de-bdc7-96c70d84cebe.png">
 
 Agora é só rodar o frontend, baixar suas dependências com `npm i` e executar o projeto
