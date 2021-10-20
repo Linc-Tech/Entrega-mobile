@@ -72,3 +72,11 @@ export const CancelButton = styled.TouchableOpacity`
     border-radius: ${SIZES.radiusBottomButtonsAndInputs}px;
     align-items: center;
 `;
+
+export const Button = styled.TouchableOpacity`
+    background-color: ${COLORS.black};
+    height: 48px;
+    justify-content: center;
+    border-radius: ${SIZES.radiusBottomButtonsAndInputs}px;
+    align-items: center;
+`;

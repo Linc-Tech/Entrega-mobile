@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import images from '../../../../constants/images';
 import { COLORS, FONTS } from '../../../../constants/theme';
 import httpStatus from '../../../../data/httpStatus';
@@ -17,9 +17,9 @@ export default function NewObject({ navigation, route }) {
         color: COLORS.grey,
     }
 
-    const [getObjectName, setObjectName] = useState();
-    const [getCategory, setCategory] = useState();
-    const [getRfid, setRfid] = useState();
+    const [getObjectName, setObjectName] = useState(null);
+    const [getCategory, setCategory] = useState(null);
+    const [getRfid, setRfid] = useState(null);
 
     const [getObjectNameInputStyle, setObjectNameInputStyle] = useState(onBlurStyle);
     const [getCategoryInputStyle, setCategoryInputStyle] = useState(onBlurStyle);
@@ -30,6 +30,7 @@ export default function NewObject({ navigation, route }) {
     const [modalVisible, setModalVisible] = useState(false);
 
     const { item } = route.params ? route.params : {};
+    const { user } = route.params;
     const title = item ? "Atualizar" : "Novo";
     const disableInput = item == null ? false : true;
     const subtitle = item ? "Enjoou? Bora mudar as algumas coisinhas por aqui" : "Falta pouco para você cadastrar seu novo objeto";
@@ -65,72 +66,77 @@ export default function NewObject({ navigation, route }) {
                 cdRfid: getRfid,
                 name: getObjectName,
                 category: getCategory,
-                user: {
-                    id: "DJOI208"
-                }
+                user
             }
 
             setLoadingCreate(true);
             const res = await createUserObject(formValues, navigation);
 
             if (res.status == httpStatus.SERVER_ERROR) {
-                const nav = navigation.navigate('Exception', { navigateTo: 'Backpack' })
+                const nav = navigation.navigate('Exception', { navigateTo: 'Backpack', user })
                 return nav;
 
             } else if (res.status == httpStatus.BAD_REQUEST) {
                 return Alert.alert('Objeto já cadastrado');
             }
 
-            navigation.goBack();
-
-        } catch (e) {
-            Alert.alert('Os valores inseridos estão inválidos, Lari');//👁👄👁
-        } finally {
             setLoadingCreate(false);
+            navigation.goBack();
+        } catch (e) {
+            Alert.alert(`Os valores inseridos estão inválidos, ${user.nickname}`);//👁👄👁
         }
     }
 
     async function handleDeleteObject(item) {
         try {
             setLoadingDelete(true);
-            const res = await deleteUser(null, item.cdRfid);
+            const res = await deleteUser(user, item.cdRfid);
 
             if (res.status == httpStatus.OK) {
                 return navigation.goBack();
             }
 
             setModalVisible(false);
-            return navigation.navigate('Exception', { navigateTo: 'Backpack' })
-
-        } catch (e) {
-            navigation.navigate('Exception', { navigateTo: 'Backpack' });
-
-        } finally {
             setLoadingDelete(false);
+            return navigation.navigate('Exception', { navigateTo: 'Backpack', user })
+        } catch (e) {
+            navigation.navigate('Exception', { navigateTo: 'Backpack', user: user  });
         }
     }
 
-    async function handleObjectToUpdate() {
+    async function handleObjectToUpdate(item) {
         try {
+            const inputs = [getObjectName, getCategory];
+            const originalInput = [item.name, item.category]
+
+            let updateSomething = false;
+            for (let i = 0; i < inputs.length; i++) {
+                if (inputs[i] == null || inputs[i] == "") {
+                    return Alert.alert(`Os valores inseridos estão inválidos \n👁👄👁`);
+
+                } else if (originalInput[i] !== inputs[i]) {
+                    updateSomething = true;
+                }
+            }
+
+            if (!updateSomething) {
+                return Alert.alert(`Você não alterou nenhum valor ainda, ${user.nickname}`);
+            }
+
             const formValues = {
                 cdRfid: item.cdRfid,
                 name: getObjectName,
                 category: getCategory,
-                user: {
-                    id: "DJOI208"
-                }
+                user
             }
 
             setLoadingCreate(true)
             const res = await updateUserObject(formValues);
 
-            if (res.status == 200) return navigation.goBack();
-
-        } catch (e) {
-            navigation.navigate('Exception', { navigateTo: 'Backpack' });
-
-        } finally {
             setLoadingCreate(false);
+            if (res.status == 200) return navigation.goBack();
+        } catch (e) {
+            navigation.navigate('Exception', { navigateTo: 'Backpack', user: user });
         }
     }
 
@@ -174,7 +180,7 @@ export default function NewObject({ navigation, route }) {
     const __renderLoading = () => {
         return(
             <View style={{ flex: 1 }}>
-                <LoadingSimbol size="small"/>
+                <LoadingSimbol size="small" color="white" />
             </View>
         );
     };
@@ -196,7 +202,7 @@ export default function NewObject({ navigation, route }) {
                         justifyContent: "center",
                     }}>
                         <View style={styles.modalView}>
-                            <Text>Lari, você tem certeza que deseja deletar esse objeto?</Text>
+                            <Text style={{ lineHeight: 24 }}>{user.nickname}, você tem certeza que deseja deletar esse objeto?</Text>
 
                             <ButtonsModal>
                                 <ModalButton
@@ -222,6 +228,7 @@ export default function NewObject({ navigation, route }) {
 
     return(
         <View style={styles.safearea}>
+            <StatusBar barStyle="light-content" />
             <KeyboardAvoidingView
                 behavior="padding"
                 style={{ flex: 1 }}
@@ -348,7 +355,7 @@ export default function NewObject({ navigation, route }) {
                                 {
                                     item ?
                                     <DeleteButton
-                                        onPress={ () => setModalVisible(true) } // handleDeleteObject(item) }
+                                        onPress={ () => setModalVisible(true) }
                                     >
                                         {
                                             isLoadingDelete ? __renderLoading()

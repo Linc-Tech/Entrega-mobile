@@ -23,5 +23,8 @@ public class ObjectDTO {
     private String category;
 
     @NotEmpty
+    private boolean inBackpack;
+
+    @NotEmpty
     private User user;
 }

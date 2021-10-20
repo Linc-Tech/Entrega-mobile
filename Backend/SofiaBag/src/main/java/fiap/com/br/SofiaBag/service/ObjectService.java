@@ -3,8 +3,8 @@ package fiap.com.br.SofiaBag.service;
 import fiap.com.br.SofiaBag.dto.request.ObjectDTO;
 import fiap.com.br.SofiaBag.dto.response.MessageResponseDTO;
 import fiap.com.br.SofiaBag.entity.Object;
-import fiap.com.br.SofiaBag.exception.object.UserObjectAlreadyExistsExeception;
-import fiap.com.br.SofiaBag.exception.object.UserObjectNotFoundException;
+import fiap.com.br.SofiaBag.exception.UserObjectAlreadyExistsExeception;
+import fiap.com.br.SofiaBag.exception.UserObjectNotFoundException;
 import fiap.com.br.SofiaBag.mapper.ObjectMapper;
 import fiap.com.br.SofiaBag.repository.ObjectRepository;
 import lombok.AllArgsConstructor;
@@ -51,7 +51,6 @@ public class ObjectService {
 	public MessageResponseDTO deleteUserObject(String userId, String cdRfid) {
 		Object objectToDelete = verifyIfUserObjectExists(userId, cdRfid);
 		objectRepository.delete(objectToDelete);
-
 		return createMessageResponse(objectToDelete, "delete");
 	}
 
@@ -68,7 +67,7 @@ public class ObjectService {
 	}
 
 	private Object verifyIfUserObjectExists(String userId, String cdRfid) throws UserObjectNotFoundException {
-    	return objectRepository.findObjectByUserIdAndCdRfid(userId, cdRfid)
+		return objectRepository.findObjectByUserIdAndCdRfid(userId, cdRfid)
 				.orElseThrow(() -> new UserObjectNotFoundException(cdRfid));
 	}
 

@@ -3,7 +3,7 @@ import httpStatus from "../../data/httpStatus";
 
 export let OBJECTS = {};
 
-const URL = `${data.url.localhost}/api/v1/object`
+const URL = `${data.url.localhost}/api/v1/backpack`
 
 export const createUserObject = async (json) => {
     try {
@@ -11,7 +11,8 @@ export const createUserObject = async (json) => {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${json.user.token}`
             },
             body: JSON.stringify(json),
         });
@@ -19,59 +20,56 @@ export const createUserObject = async (json) => {
         return response;
 
     } catch (e) {
-        console.log("We got an error!");
-        console.error(e);
-        return httpStatus.SERVER_ERROR;
+        return error(e);
     }
 }
 
-export const getUserObjects = async () => {
-    const userId = "DJOI208";
-
+export const getUserObjects = async (user) => {
     try {
-        const response = await fetch(`${URL}/${userId}`)
-            .then((res) => res.json());
+        const response = await fetch(`${URL}/${user.id}`, {
+            method: "GET",
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${user.token}`
+            },
+        }).then((res) => res.json());
 
         return response;
 
     } catch (e) {
-        console.log("We got an error!");
-        console.error(e);
-        return httpStatus.SERVER_ERROR;
+        return error(e);
     }
 }
 
-export const deleteUser = async (userId, objectId) => {
-    userId = "DJOI208";
-
+export const deleteUser = async (user, objectId) => {
     try {
-        const response = await fetch(`${URL}/userId=${userId}&objectId=${objectId}`, {
+        const response = await fetch(`${URL}/userId=${user.id}&objectId=${objectId}`, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${user.token}`
             },
         })
 
         return response;
 
     } catch (e) {
-        console.log("We got an error!");
-        console.error(e);
-        return httpStatus.SERVER_ERROR;
+        return error(e);
     }
 }
 
 export const updateUserObject = async (json) => {
-    const userId = json.user.id;
-    const { cdRfid } = json;
+    const { user, cdRfid } = json;
 
     try {
-        const response = await fetch(`${URL}/userId=${userId}&objectId=${cdRfid}`, {
+        const response = await fetch(`${URL}/userId=${user.id}&objectId=${cdRfid}`, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${user.token}`
             },
             body: JSON.stringify(json),
         });
@@ -79,8 +77,12 @@ export const updateUserObject = async (json) => {
         return response;
 
     } catch (e) {
-        console.log("We got an error!");
-        console.error(e);
-        return httpStatus.SERVER_ERROR;
+        return error(e);
     }
+}
+
+function error(e) {
+    console.log("We got an error!");
+    console.error(e);
+    return httpStatus.SERVER_ERROR;
 }

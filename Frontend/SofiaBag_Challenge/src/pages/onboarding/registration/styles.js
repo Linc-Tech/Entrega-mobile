@@ -62,6 +62,13 @@ export const ButtonSection = styled.View`
     margin: 40px 0;
 `;
 
+export const Button = styled.TouchableOpacity`
+    background-color: ${COLORS.black};
+    height: 48px;
+    justify-content: center;
+    border-radius: ${SIZES.radiusBottomButtonsAndInputs}px;
+`;
+
 export const DeleteButton = styled.TouchableOpacity`
     margin-top: 10px;
     background-color: ${COLORS.red};

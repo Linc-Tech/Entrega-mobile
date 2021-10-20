@@ -1,8 +1,10 @@
 package fiap.com.br.SofiaBag.service;
 
+import fiap.com.br.SofiaBag.dto.request.PasswordDTO;
 import fiap.com.br.SofiaBag.dto.request.UserDTO;
 import fiap.com.br.SofiaBag.dto.response.MessageResponseDTO;
 import fiap.com.br.SofiaBag.entity.User;
+import fiap.com.br.SofiaBag.exception.UserNotFoundException;
 import fiap.com.br.SofiaBag.mapper.UserMapper;
 import fiap.com.br.SofiaBag.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -23,16 +25,30 @@ public class UserService {
 
     public MessageResponseDTO createUser(UserDTO userDTO) {
         User userToSave = userMapper.toModel(userDTO);
+
+        userToSave.setPassword(
+                AuthenticationService
+                        .getPasswordEncoder()
+                        .encode(userToSave.getPassword()));
+
         User savedUser = userRepository.save(userToSave);
-        return createMessageResponse(savedUser);
+        return createMessageResponse(savedUser, "create");
     }
 
     public Optional<UserDTO> getUser(String id) {
-        Optional<User> userFound = userRepository.findById(id);
+        Optional<User> userFound = userRepository.findUserById(id);
         if (userFound.isPresent()) {
             return userFound.map(userMapper::toDTO);
         }
-        return null; // throws exception to handle it?
+        throw new UserNotFoundException();
+    }
+
+    public Optional<UserDTO> getUserByEmail(String email) {
+        Optional<User> userFound = userRepository.findUserByEmail(email);
+        if (userFound.isPresent()) {
+            return userFound.map(userMapper::toDTO);
+        }
+        throw new UserNotFoundException();
     }
 
     public List<UserDTO> listAll() {
@@ -42,10 +58,30 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    private MessageResponseDTO createMessageResponse( User savedUser ) {
-        return MessageResponseDTO
-                .builder()
-                .message("User " + savedUser.getName() + " created with ID " + savedUser.getId())
-                .build();
+    public MessageResponseDTO updateUserPassword(PasswordDTO passwordDTO) {
+        User user = userRepository.findUserByEmail(passwordDTO.getEmail()).get();
+        user.setPassword(
+                AuthenticationService
+                        .getPasswordEncoder()
+                        .encode(passwordDTO.getPassword()));
+
+        User updatedUser = userRepository.save(user);
+
+        return createMessageResponse(updatedUser, "update");
+    }
+
+    private MessageResponseDTO createMessageResponse(User savedUser, String messageFor) {
+        if (messageFor.startsWith("create")) {
+            return MessageResponseDTO.builder()
+                    .message("User " + savedUser.getName() + " created with ID " + savedUser.getId()).build();
+
+        } else if (messageFor.startsWith("up")) {
+            return MessageResponseDTO.builder()
+                    .message("User " + savedUser.getName() + " updeted with ID " + savedUser.getId()).build();
+
+        } else {
+            return MessageResponseDTO.builder()
+                    .message("User " + savedUser.getName() + " deleted with ID " + savedUser.getId()).build();
+        }
     }
 }

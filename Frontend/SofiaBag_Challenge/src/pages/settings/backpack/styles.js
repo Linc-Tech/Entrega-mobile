@@ -6,11 +6,6 @@ export const Container = styled.SafeAreaView`
   background-color: ${COLORS.black};
 `;
 
-export const Background = styled.Image`
-  width: 80%;
-  height: 80%;
-`;
-
 export const Item = styled.View`
   margin: 0 0 20px;
   flex-direction: row;

@@ -1,11 +1,10 @@
 import { useFocusEffect } from '@react-navigation/core';
 import moment from 'moment';
 import React, { Fragment, useCallback, useState } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { FONTS } from '../../../../constants/theme';
 import ScreenHeader from '../../../components/ScreenHeader';
-import { v4 as uuid } from 'uuid';
 import icons from '../../../../constants/icons';
 import {
     AddItem,
@@ -25,53 +24,57 @@ import {
     SectionTwo,
     UpdateButton
 } from './styles';
-
-let OBJECTS_DATA = [
-    {
-        id: uuid(),
-        name: "Notebook da empresa",
-        reminderHour: "8h",
-        codRfid: "JDIOJ201",
-        reminderDate: "20/09/2021"
-    },
-    {
-        id: uuid(),
-        name: "Notebook da empresa",
-        reminderHour: "8h",
-        codRfid: "JDIOJ201",
-        reminderDate: "20/09/2021"
-    },
-    {
-        id: uuid(),
-        name: "Notebook da empresa",
-        reminderHour: "8h",
-        codRfid: "JDIOJ201",
-        reminderDate: "20/09/2021"
-    },
-]
+import { deleteUserReminder, getUserObjectsFromADate } from '../../../services/ScheduleService';
+import httpStatus from '../../../../data/httpStatus';
+import LoadingSimbol from '../../../components/LoadingSimbol';
+import data from '../../../../data/data';
 
 let SELECTED_DATE;
 
-export default function Schedule({ navigation }) {
-    // OBJECTS_DATA = [];
-
+export default function Schedule({ navigation, route }) {
+    const { user } = route.params;
     const INITIAL_DATE = moment().format("YYYY-MM-DD");
+
     const [showDeleteModal, setDeleteModal] = useState(false);
     const [selected, setSelected] = useState(INITIAL_DATE);
     const [pointerEvents, setPointerEvents] = useState("pointer");
+    const [isLoading, setLoading] = useState(false);
     const [getObjects, setObjects] = useState([]);
     const [getObjectToDelete, setObjectToDelete] = useState();
 
+    const fetchData = async () => {
+        setLoading(true);
+
+        const res = await getUserObjectsFromADate(user, SELECTED_DATE || selected);
+        setObjects(res);
+
+        setLoading(false);
+    };
+
     useFocusEffect(useCallback(() => {
-        // handleGetUserObjectsList(selected || SELECTED_DATE);
+        fetchData();
     }, [navigation]));
 
     const onDayPress = day => {
-        OBJECTS_DATA = [];
         SELECTED_DATE = day.dateString;
-        // handleGetUserObjectsList(SELECTED_DATE);
         setSelected(SELECTED_DATE);
+        fetchData();
     };
+
+    async function handleRemoveObject(object) {
+        object.repeatType = 0;
+        const res = await deleteUserReminder(user, object.id);
+
+        if (res == httpStatus.SERVER_ERROR) {
+            navigation.navigate('Exception', {
+                navigateTo: 'Calendar',
+                user
+            });
+        }
+        setDeleteModal(false);
+        fetchData();
+    }
+
 
     const renderCalendar = () => {
         LocaleConfig.locales['br'] = {
@@ -84,7 +87,7 @@ export default function Schedule({ navigation }) {
         LocaleConfig.defaultLocale = 'br';
 
         return (
-            <View>
+            <View style={{ flex: 1 }}>
                 <Text style={styles.textTitle}>
                     Eai, que tal adicionar um lembrete para um novo objeto para a Sofia te lembrar?
                 </Text>
@@ -129,37 +132,52 @@ export default function Schedule({ navigation }) {
                         monthFormat={"MMMM yy"}
                     />
                 </Fragment>
-                <Text style={styles.textTitle}>
-                    Veja o que você tem que lembrar de colocar na sua mochila nesse dia:
-                </Text>
+                <View style={{ flex: 1 }}>
+                    <Text style={styles.textTitle}>
+                        Veja o que você tem que lembrar de colocar na sua mochila nesse dia:
+                    </Text>
+
+                    <View>
+                        {
+                            isLoading ? renderLoading()
+                            :
+                            getObjects == '' ?
+                            <Text style={{ ...FONTS.p, color: 'black', textAlign: 'center', marginTop: 30, fontWeight: 'bold' }}>
+                                Sem lembretes para essa data, {user.nickname}
+                            </Text>
+                            :
+                            <View></View>
+                        }
+                    </View>
+                </View>
             </View>
         );
     }
 
     const renderItems = ({ item }) => {
-        const reminderDate = moment(item.reminder).format('DD/MM/YYYY');
-        const reminderHour = moment(item.reminder).format('H:mm');
+        const [reminderDate] = item.reminderDate.split(' ');
 
         return (
             <ObjectSection>
                 <Item>
                     <ItemHeader>
                         <Text style={{
-                        ...FONTS.pReminderTitle,
-                        color: 'black',
-                        fontWeight: 'bold'
+                            ...FONTS.pReminderTitle,
+                            color: 'black',
+                            fontWeight: 'bold'
                         }}>
-                        {item.name}
+                        {item.object.name}
                         </Text>
                     </ItemHeader>
 
                     <ItemContent>
                         <SectionOne>
                             <Text style={styles.text}>
-                                Lembrete {reminderHour}
+                                Lembrete {item.reminderHour}
                             </Text>
+
                             <Text style={[ styles.text, { marginTop: 5 } ]}>
-                                RFID {item.cdRfid}
+                                {item.object.category}
                             </Text>
                         </SectionOne>
 
@@ -167,6 +185,7 @@ export default function Schedule({ navigation }) {
                             <Text style={styles.text}>
                                 Data do lembrete
                             </Text>
+
                             <Text style={[ styles.text, { marginTop: 5, textAlign: 'center' } ]}>
                                 {reminderDate}
                             </Text>
@@ -180,7 +199,8 @@ export default function Schedule({ navigation }) {
                                 navigation.navigate("NewReminder", {
                                 operationType: "Atualizar",
                                 itemToUpdate: item,
-                                selectedDate: selected
+                                selectedDate: selected,
+                                user
                             });
                         }}>
                         <PenIcon
@@ -204,7 +224,7 @@ export default function Schedule({ navigation }) {
         return (
             <Popup>
                 <Text style={{ ...FONTS.h2, lineHeight: 24, flex: 2, }}>
-                    Lari, você tem certeza que deseja remover esse item dos seus lembretes?
+                    {user.nickname}, você tem certeza que deseja remover esse item dos seus lembretes?
                 </Text>
 
                 <ButtonsPopup>
@@ -223,8 +243,18 @@ export default function Schedule({ navigation }) {
         );
     };
 
+
+    const renderLoading = () => {
+        return(
+        <View style={{ flex: 1 }}>
+            <LoadingSimbol size="small" color="primary" />
+        </View>
+        );
+    };
+
     return(
         <SafeAreaView style={styles.safearea}>
+            <StatusBar barStyle="dark-content" />
             <View style={styles.container}>
                 <ScreenHeader navigation={navigation} >
                     Calendário
@@ -235,9 +265,9 @@ export default function Schedule({ navigation }) {
                     <FlatList
                         pointerEvents={pointerEvents}
                         ListHeaderComponent={renderCalendar}
-                        data={OBJECTS_DATA} //{getObjects}
+                        data={getObjects}
                         renderItem={renderItems}
-                        keyExtractor={ item => item.cdRfid }
+                        keyExtractor={ item => item.id }
                         showsVerticalScrollIndicator={false}
                     />
                 </View>
@@ -245,7 +275,8 @@ export default function Schedule({ navigation }) {
                 <AddItem onPress={() =>
                     navigation.navigate("NewReminder", {
                         operationType: "Adicionar",
-                        selectedDate: selected
+                        selectedDate: selected,
+                        user
                     })}>
                     <Text style={{ ...FONTS.buttons, fontWeight: 'bold', textAlign: 'center' }}>
                         Adicionar novo objeto

@@ -1,8 +1,10 @@
 export const COLORS = {
     // colors
     black: "#343A40",
+    // black: "#1b1b1b",
+    // black: "#212121",
     white: "#FFFFFF",
-    grey: "#EEEEEE",
+    grey: "#B2B1B9",
     links: "#0066FF",
     blackWallpaper: "0066FF",
     red: "#FF5959",

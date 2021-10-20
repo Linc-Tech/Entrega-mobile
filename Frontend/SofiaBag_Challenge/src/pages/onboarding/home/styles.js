@@ -25,8 +25,8 @@ export const Welcome = styled.View``;
 
 export const Logout = styled.TouchableOpacity`
     background-color: ${COLORS.red};
-    padding: 4px 15px;
-    border-radius: ${SIZES.radiusTopButtons};
+    padding: 3.5px 15px;
+    border-radius: ${SIZES.radiusTopButtons}px;
 `;
 
 export const Title = styled.View`
@@ -35,5 +35,18 @@ export const Title = styled.View`
 `;
 
 export const Menu = styled.View`
+    /* align-items: center; */
     margin-left: 30px;
+`;
+
+export const ButtonsModal = styled.View`
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 20px 0 0;
+    width: 100%;
+`;
+
+export const ModalButton = styled.TouchableOpacity`
+    border-radius: ${SIZES.radiusBottomButtonsAndInputs}px;
+    padding: 10px 20px;
 `;

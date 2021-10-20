@@ -7,11 +7,14 @@ import {
   Icon,
 } from './styles';
 
-const MenuOption = ({ item, navigation }) => {
+const MenuOption = ({ item, navigation, route }) => {
+
   return (
     <SafeAreaView>
       <Option style={{ marginLeft: 0, }}
-        onPress={() => { navigation.navigate(`${item.nav}`) }}
+        onPress={() => { navigation.navigate(`${item.nav}`, {
+          user: route,
+        }) }}
       >
         <Icon
           source={item.icon}

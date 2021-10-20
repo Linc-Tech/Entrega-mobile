@@ -10,5 +10,4 @@ import java.util.Optional;
 public interface ObjectRepository extends JpaRepository<Object, String> {
     List<Object> findObjectByUserId(String id);
     Optional<Object> findObjectByUserIdAndCdRfid(String userId, String objectId);
-
 }

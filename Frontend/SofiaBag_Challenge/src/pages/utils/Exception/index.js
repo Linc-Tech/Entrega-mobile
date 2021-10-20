@@ -1,23 +1,24 @@
 
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, View, ScrollView } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View, ScrollView, StatusBar } from 'react-native';
 import avatar from '../../../../constants/avatar';
 import { COLORS, FONTS } from '../../../../constants/theme';
 import { ButtonSection, Image } from './styles';
 
 export default function({ navigation, route }) {
-  const { navigateTo } = route.params ? route.params : {};
+  const { navigateTo, user } = route.params ? route.params : {};
 
   function navigate() {
     if (navigateTo) {
-      navigation.navigate(navigateTo);
+      navigation.navigate(navigateTo, { user });
     } else {
-      navigation.navigate('Home')
+      navigation.navigate('Home', { user })
     }
   }
 
   return(
     <SafeAreaView style={styles.safearea}>
+      <StatusBar barStyle="dark-content" />
       <View style={styles.container}>
         <ScrollView
           showsVerticalScrollIndicator={false}

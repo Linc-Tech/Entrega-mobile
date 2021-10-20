@@ -1,8 +1,8 @@
-const LOCAL_PORT = '8082';
+const LOCAL_PORT = '9091';
 
 export default {
   url: {
     localhost: `http://localhost:${LOCAL_PORT}`,
-    cloud: '',
+    cloud: 'https://sofia-bag.azurewebsites.net',
   },
 }

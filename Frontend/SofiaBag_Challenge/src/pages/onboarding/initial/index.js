@@ -12,7 +12,7 @@ const Initial = ({ navigation }) => {
         source={images.initialPageWallpaper}
       />
       <Filtro
-        opacity={0.2}
+        opacity={0.3}
       />
       <Content>
         <Title>
@@ -28,7 +28,6 @@ const Initial = ({ navigation }) => {
           <Text style={{ ...FONTS.buttons, color: COLORS.black, fontWeight: 'bold' }}>Abrir mochila</Text>
         </Button>
       </Content>
-
     </Container>
   );
 };

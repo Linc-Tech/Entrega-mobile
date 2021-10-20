@@ -1,15 +1,18 @@
 import React, { useCallback, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/core';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { COLORS, FONTS, SIZES } from '../../../../constants/theme';
 
 import ScreenHeader from '../../../components/ScreenHeader';
-import { AddItem, Background, Container, Details, Footer, Infos, Item, Number } from './styles';
+import { AddItem, Container, Details, Footer, Infos, Item, Number } from './styles';
 import { getUserObjects } from '../../../services/ObjectService';
 import avatar from '../../../../constants/avatar';
 import LoadingSimbol from '../../../components/LoadingSimbol';
+import httpStatus from '../../../../data/httpStatus';
+import EmptyList from '../../../components/EmptyList';
 
-export default function Backpack({ navigation }) {
+export default function Backpack({ navigation, route }) {
+  const { user } = route.params;
   const [getObjects, setObjects] = useState([]);
   const [isLoading, setLoading] = useState(true);
 
@@ -17,28 +20,31 @@ export default function Backpack({ navigation }) {
     useCallback(() => {
       const fetchData = async () => {
         setLoading(true);
-        const response = await getUserObjects();
+        const response = await getUserObjects(user);
 
         setLoading(false);
-        if (response == 500) return navigation.navigate('Exception');
+        if (response == httpStatus.SERVER_ERROR) return navigation.navigate('Exception', { user });
 
         setObjects(response);
+        setLoading(false);
       };
 
-      fetchData();
+    fetchData();
     }, [navigation])
   );
 
-  const __renderItems = ({ item }) => {
+
+  const __renderItems = ({ item, index }) => {
     return(
       <Item>
         <Infos
           onPress={ () => navigation.navigate("NewObject", {
             item: item,
+            user: user,
           })}
         >
           <Number>
-            <Text style={styles.number}></Text>
+            <Text style={styles.number}>{index + 1}</Text>
           </Number>
 
           <Details>
@@ -50,29 +56,17 @@ export default function Backpack({ navigation }) {
     );
   };
 
-  const __renderNoListResponse = () => {
-    return (
-      <View style={styles.centerView}>
-        <Background
-          source={avatar.sadAvatar}
-        />
-        <Text style={{ ...FONTS.p, color: 'white', marginVertical: 20, lineHeight: 24 }}>
-          Sua mochila está vazia
-        </Text>
-      </View>
-    );
-  };
-
   const __renderLoading = () => {
     return(
       <View style={{ flex: 1 }}>
-        <LoadingSimbol size="large" />
+        <LoadingSimbol size="large" color="white" />
       </View>
     );
   };
 
   return(
     <View style={{ flex: 1 }}>
+      <StatusBar barStyle="light-content" />
       <Container>
         <View style={styles.margin}>
           <ScreenHeader
@@ -85,7 +79,7 @@ export default function Backpack({ navigation }) {
 
         <Text
           style={{ ...FONTS.p, color: 'white', marginVertical: 20, lineHeight: 24, marginHorizontal: 30 }}>
-          Lari, você tem alguma etiqueta rfid da Sofia para adicionar nos seus objetos?
+          {user.nickname}, você tem alguma etiqueta rfid da Sofia para adicionar nos seus objetos?
         </Text>
 
         <View style={{ flex: 1, marginHorizontal: 30, marginVertical: 20, }}>
@@ -93,11 +87,18 @@ export default function Backpack({ navigation }) {
           {
             isLoading ? __renderLoading()
             :
-            getObjects == '' ? __renderNoListResponse()
+            getObjects == ''
+            ?
+            <EmptyList
+              message="Sua mochila está vazia"
+              avatarType={avatar.sadAvatar}
+              fontColor="white"
+              fontWeight="normal"
+            />
             :
             <FlatList
               data={getObjects}
-              renderItem={(item) => __renderItems(item)}
+              renderItem={(item, index) => __renderItems(item, index)}
               keyExtractor={ item => item.cdRfid }
               showsVerticalScrollIndicator={false}
             />
@@ -105,7 +106,9 @@ export default function Backpack({ navigation }) {
         </View>
         <Footer>
           <AddItem
-            onPress={ () => navigation.navigate("NewObject") }
+            onPress={ () => navigation.navigate("NewObject", {
+              user: user
+            }) }
           >
             <Text style={{ ...FONTS.h2, color: COLORS.black }}>
               Adicionar objeto na mochila
@@ -121,7 +124,7 @@ const styles = StyleSheet.create({
   number: {
     fontSize: SIZES.regular,
     fontWeight: 'bold',
-    color: '#EDEDED',
+    color: COLORS.grey,
   },
 
   itemName: {

@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, Animated, KeyboardAvoidingView } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, KeyboardAvoidingView, Alert, StatusBar } from 'react-native';
 import { COLORS, FONTS, SIZES } from '../../../../constants/theme';
-import Button from '../../../components/Button';
 import ComeBackButton from '../../../components/ComeBackButton';
 import { TextInputMask } from 'react-native-masked-text';
-import { ButtonSection, Container, Form, Header, TextInput, Title, Placeholder, InputBox } from './styles';
+import { ButtonSection, Button, Container, Form, Header, TextInput, Title, Placeholder, InputBox } from './styles';
+import { createUser } from '../../../services/UserService';
+import httpStatus from '../../../../data/httpStatus';
+
+import { v4 as uuid } from 'uuid';
+import LoadingSimbol from '../../../components/LoadingSimbol';
+import data from '../../../../data/data';
 
 export default function Registration({ navigation }) {
   const onBlurStyle = {
@@ -23,50 +28,24 @@ export default function Registration({ navigation }) {
   const [getTelephoneInputStyle, setTelephoneInputStyle] = useState(onBlurStyle);
 
   const [getNameInput, setNameInput] = useState(null);
-  const [getNicknameInput, setNicknameInput] = useState();
-  const [getIdInput, setIdInput] = useState();
-  const [getEmailInput, setEmailInput] = useState();
-  const [getPasswordInput, setPasswordInput] = useState();
-  const [getConfirmPassword, setConfirmPassword] = useState();
-  const [getTelephoneInput, setTelephoneInput] = useState();
+  const [getNicknameInput, setNicknameInput] = useState(null);
+  const [getIdInput, setIdInput] = useState(null);
+  const [getEmailInput, setEmailInput] = useState(null);
+  const [getPasswordInput, setPasswordInput] = useState(null);
+  const [getConfirmPassword, setConfirmPassword] = useState(null);
+  const [getTelephoneInput, setTelephoneInput] = useState(null);
+
+  const [isLoading, setLoading] = useState(false);
 
   const listOfSets = [
-    {
-      set: setNameInputStyle,
-      id: 'Nome'
-    },
-
-    {
-      set: setNicknameInputStyle,
-      id: 'Apelido'
-    },
-
-    {
-      set: setIdInputStyle,
-      id: 'ID'
-    },
-
-    {
-      set: setEmailInputStyle,
-      id: 'Email'
-    },
-
-    {
-      set: setPasswordInputStyle,
-      id: 'Senha'
-    },
-
-    {
-      set: setConfirmPasswordStyle,
-      id: 'Confirmar'
-    },
-
-    {
-      set: setTelephoneInputStyle,
-      id: 'Telefone'
-    },
-
-  ]
+    { set: setNameInputStyle, id: 'Nome' },
+    { set: setNicknameInputStyle, id: 'Apelido' },
+    { set: setIdInputStyle, id: 'ID' },
+    { set: setEmailInputStyle, id: 'Email' },
+    { set: setPasswordInputStyle, id: 'Senha' },
+    { set: setConfirmPasswordStyle, id: 'Confirmar' },
+    { set: setTelephoneInputStyle, id: 'Telefone' },
+  ];
 
   function onFocus(input) {
     for (let i = 0; i < listOfSets.length; i++) {
@@ -103,8 +82,64 @@ export default function Registration({ navigation }) {
     }
   }
 
+  function isFormInvalid(user) {
+    for (let i in user) {
+      const value = user[i];
+      if (!value) {
+        Alert.alert("Por favor, insira os valores corretamente");
+        return true;
+      }
+    }
+
+    const password = user.password;
+    const confirmPassword = getConfirmPassword;
+
+    if (password != confirmPassword) {
+      Alert.alert("Você digitou dois valores diferentes para a senha");
+      return true;
+    }
+
+    return false;
+  }
+
+  async function handleCreateUser() {
+    const user = {
+      id: uuid(),
+      name: getNameInput,
+      nickname: getNicknameInput,
+      email: getEmailInput,
+      password: getPasswordInput,
+    };
+
+    if (isFormInvalid(user)) return;
+
+    setLoading(true);
+    const res = await createUser(user);
+
+    if (res == httpStatus.SERVER_ERROR) {
+      const nav = navigation.navigate("Exception", {
+        navigationTo: 'Registration'
+      });
+
+      return nav;
+    };
+
+    setLoading(false);
+    data.user = { ...user };
+    navigation.navigate('Login');
+  }
+
+  const renderLoading = () => {
+    return(
+        <View style={{ flex: 1 }}>
+            <LoadingSimbol size="small"/>
+        </View>
+    );
+  };
+
   return(
     <View style={styles.safearea}>
+      <StatusBar barStyle="light-content" />
       <KeyboardAvoidingView
           behavior="padding"
           style={{ flex: 1 }}
@@ -173,30 +208,6 @@ export default function Registration({ navigation }) {
                         fontWeight: getNicknameInputStyle.fontWeight,
                       }}>
                         Apelido
-                      </Text>
-                    </Placeholder>
-                </View>
-
-                <View style={{ marginTop: 10, marginBottom: 20 }}>
-                  <TextInput
-                    onChangeText={setIdInput}
-                    value={getIdInput}
-                    autoCapitalize='characters'
-                    onFocus={() => onFocus('ID')}
-                    onBlur={() => onBlur('ID', getIdInput)}
-                    selectionColor={COLORS.black}
-                    style={{
-                      borderColor: getIdInputStyle.borderColor
-                    }}
-                  />
-                  <Placeholder>
-                      <Text style={{
-                        color: getIdInputStyle.color,
-                        transform: getIdInputStyle.transform,
-                        fontSize: getIdInputStyle.fontSize,
-                        fontWeight: getIdInputStyle.fontWeight,
-                      }}>
-                        ID da mochila
                       </Text>
                     </Placeholder>
                 </View>
@@ -316,10 +327,16 @@ export default function Registration({ navigation }) {
 
               <ButtonSection>
                 <Button
-                    navigation={navigation}
-                    route="Home"
-                    text='Cadastrar Sofia'
-                />
+                  onPress={ () =>  handleCreateUser() }
+                >
+                  {
+                    isLoading ? renderLoading()
+                    :
+                    <Text style={{ ...FONTS.buttons, fontWeight: 'bold', textAlign: 'center' }}>
+                      Cadastrar Sofia
+                    </Text>
+                  }
+                </Button>
               </ButtonSection>
             </Container>
           </ScrollView>

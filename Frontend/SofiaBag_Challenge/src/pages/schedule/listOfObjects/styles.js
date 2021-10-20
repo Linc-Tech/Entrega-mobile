@@ -24,7 +24,7 @@ export const Title = styled.View`
 export const Item = styled.TouchableOpacity`
     flex-direction: row;
     justify-content: space-between;
-    border-top-width: 1px;
+    border-bottom-width: 1px;
     padding: 15px 0;
     border-color: ${COLORS.grey};
 `;

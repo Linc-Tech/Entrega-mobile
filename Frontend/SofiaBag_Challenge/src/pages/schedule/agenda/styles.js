@@ -1,40 +1,10 @@
 import styled from 'styled-components/native';
 import { COLORS, SIZES } from '../../../../constants/theme';
 
-export const Page = styled.SafeAreaView`
-    height: 100%;
-`;
-
-export const Container = styled.View`
-    margin: 20px 30px 5px;
-    flex: 1;
-`;
-
-export const Header = styled.View`
-    flex-direction: row;
-    margin: 10px 0 40px;
-    justify-content: center;
-    align-items: center;
-`;
-
-export const Title = styled.View`
-    flex: 1;
-    align-items: center;
-    padding-right: 40px;
-`;
-
-export const Content = styled.View`
-    flex: 8;
-`;
-
 export const Dates = styled.View`
     margin-top: 40px;
     height: 170px;
     flex-direction: row;
-`;
-
-export const ToDo = styled.View`
-    flex: 2.5;
 `;
 
 export const Objects = styled.View`
@@ -43,13 +13,19 @@ export const Objects = styled.View`
 
 export const ObjectInfo = styled.View`
     flex-direction: row;
-    border-radius: ${SIZES.radiusReminders};
+    border-radius: ${SIZES.radiusReminders}px;
     margin-top: 7px;
+    padding: 10px 0;
+`;
+
+export const ImageBox = styled.View`
+    justify-content: center;
+    align-items: center;
 `;
 
 export const ObjectImage = styled.Image`
-    width: 100px;
-    height: 120px;
+    width: 90px;
+    height: 100px;
     margin: 0 20px;
 `;
 

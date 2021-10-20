@@ -1,23 +1,39 @@
-import React, { useState } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { COLORS, FONTS } from '../../../../constants/theme';
+import data from '../../../../data/data';
+import httpStatus from '../../../../data/httpStatus';
 import ComeBackButton from '../../../components/ComeBackButton';
+import LoadingSimbol from '../../../components/LoadingSimbol';
+import { getUserObjects } from '../../../services/ObjectService';
 import { Container, Header, Item, Title } from './styles';
-import { v4 as uuid } from 'uuid';
-
-const DATA = [
-  {
-    id: 'TH638BK',
-    name: 'Notebook da empresa'
-  },
-  {
-    id: 'KS09NSD',
-    name: 'Chave do armário'
-  },
-]
 
 export default function listOfObjects({ navigation, route }) {
-  // console.log("LISTA PAGE", route.params, route.params.length);
+  const { user } = route.params;
+  const [getObjects, setObjects] = useState([]);
+  const [isLoading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const response = await getUserObjects(user);
+
+      if (response == httpStatus.SERVER_ERROR) return navigation.navigate('Exception', { user });
+
+      setObjects(response);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [navigation]);
+
+  const renderLoading = () => {
+    return(
+      <View style={{ flex: 1 }}>
+        <LoadingSimbol size="large" color="primary" />
+      </View>
+    );
+  };
 
   const renderItem = ({ item }) => {
     return(
@@ -25,7 +41,7 @@ export default function listOfObjects({ navigation, route }) {
         onPress={ () => {
           navigation.navigate('NewReminder', {
             item: item,
-            // newReminder: route.params
+            user
           });
         }}
       >
@@ -36,13 +52,15 @@ export default function listOfObjects({ navigation, route }) {
   }
 
   return(
-    <View style={{ flex: 1, backgroundColor: `${COLORS.black}` }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.black }}>
+      <StatusBar barStyle="dark-content" />
       <Container>
         <SafeAreaView style={{ flex: 1 }}>
           <View style={styles.container}>
             <Header>
               <ComeBackButton
-                navigation={navigation}/>
+                navigation={navigation}
+              />
 
               <Title>
                 <Text style={{ ...FONTS.commonTitle, fontWeight: 'bold', color: `${COLORS.black}` }}>Objetos</Text>
@@ -52,25 +70,27 @@ export default function listOfObjects({ navigation, route }) {
             <Text style={{
               ...FONTS.p,
               color: 'black',
-              marginVertical: 10,
               lineHeight: 24,
-              marginHorizontal: 18,
-            }}>Selectione o item que deseja adicionar um lembrete</Text>
+            }}>Selecione o item para a Sofia te lembrar de colocar na mochila</Text>
 
-            <View>
-              <FlatList
-                data={DATA}
-                renderItem={renderItem}
-                keyExtractor={ item => item.id }
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-                style={{
-                  marginTop: 35,
-                  borderBottomWidth: 1,
-                  borderBottomColor: `${COLORS.grey}`,
-                  marginBottom: 15,
-                }}
-              />
+            <View style={{ flex: 1 }}>
+              {
+                isLoading ? renderLoading()
+                :
+                <FlatList
+                  data={getObjects}
+                  renderItem={renderItem}
+                  keyExtractor={ item => item.cdRfid }
+                  showsVerticalScrollIndicator={false}
+                  showsHorizontalScrollIndicator={false}
+                  style={{
+                    marginTop: 35,
+                    marginBottom: 15,
+                    borderTopWidth: 1,
+                    borderTopColor: COLORS.grey
+                  }}
+                />
+              }
             </View>
           </View>
         </SafeAreaView>

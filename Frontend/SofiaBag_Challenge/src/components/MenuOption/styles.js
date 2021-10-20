@@ -5,11 +5,12 @@ export const Option = styled.TouchableOpacity`
     background-color: ${COLORS.white};
     width: 135px;
     height: 135px;
-    padding: 15px;
+    padding: 10px;
     margin-right: 15px;
-    justify-content: space-around;
+    margin-bottom: 15px;
+    justify-content: center;
     align-items: center;
-    border-radius: ${SIZES.radiusPageAndBlocks};
+    border-radius: ${SIZES.radiusPageAndBlocks}px;
 `;
 
 export const Icon = styled.Image`

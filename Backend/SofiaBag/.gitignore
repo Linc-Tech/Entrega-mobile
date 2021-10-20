@@ -1,7 +1,4 @@
 HELP.md
-target/
-bin/
-/bin/src/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -40,3 +37,4 @@ build/
 
 ### VS Code ###
 .vscode/
+/target/

@@ -1,18 +1,20 @@
 import moment from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, FlatList, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, FlatList, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import images from '../../../../constants/images';
 import { COLORS, FONTS, SIZES } from '../../../../constants/theme';
 import ComeBackButton from '../../../components/ComeBackButton';
 import { TextInputMask } from 'react-native-masked-text';
-import { Background, CancelButton, Filtro, Form, Placeholder, SelectedDay, Subtitle, TextInput } from './styles';
-import Button from '../../../components/Button';
+import { Background, Button, CancelButton, Filtro, Form, Placeholder, SelectedDay, Subtitle, TextInput } from './styles';
 import { useFocusEffect } from '@react-navigation/native';
+import { v4 as uuid } from 'uuid';
+import httpStatus from '../../../../data/httpStatus';
+import { createReminder, updateUserReminder } from '../../../services/ScheduleService';
 
 const MODAL_OPTIONS = [
     {
         option: 'Nunca',
-        id: 0
+        id: 0,
     },
 
     {
@@ -23,16 +25,6 @@ const MODAL_OPTIONS = [
     {
         option: 'Toda semana',
         id: 2
-    },
-
-    {
-        option: 'Todo mês',
-        id: 3
-    },
-
-    {
-        option: 'Todo ano',
-        id: 4
     },
 ]
 
@@ -54,7 +46,7 @@ export default function NewReminder({ navigation, route }) {
     const [getReminderInputStyle, setReminderInputStyle] = useState(onBlurStyle);
     const [getRepetInputStyle, setRepetInputStyle] = useState(onBlurStyle);
 
-    const { operationType, itemToUpdate, selectedDate, item } = route.params;
+    const { operationType, itemToUpdate, selectedDate, item, user } = route.params;
     const disableInput = getItemToUpdate == null ? false : true;
 
     const title = getOperationType == "Adicionar" ? "Novo" : getOperationType;
@@ -71,16 +63,6 @@ export default function NewReminder({ navigation, route }) {
         dayOfWeekFormatted += dayOfWeek[i].toUpperCase();
     }
 
-    let objectToSave = {
-        cdRfid: '',
-        name: '',
-        category: '',
-        reminder: '',
-        user: {
-            id: 'DJOI208'
-        },
-    }
-
     useFocusEffect(
         useCallback(() => {
             if (item) onFocus('Nome');
@@ -93,8 +75,107 @@ export default function NewReminder({ navigation, route }) {
         setSelectedDate(selectedDate);
 
         if (itemToUpdate) onFocus('Nome');
-
     }, [])
+
+    function formIncomplete() {
+        return Alert.alert("Insira os valores corretamente");
+    }
+
+    function validateForm() {
+        if (item == null || item == '') {
+            formIncomplete();
+            return false;
+
+        } else if (getReminder == null || getReminder == '') {
+            formIncomplete();
+            return false;
+
+        } else if (getRepet == null || getRepet == '') {
+            formIncomplete();
+            return false;
+        }
+        return true;
+    }
+
+    async function handleUpdateItem() {
+        const date = moment(getSelectedDate).format('YYYY-MM-DD');
+
+        let repeatType = 0;
+        for (let i in MODAL_OPTIONS) {
+            if (MODAL_OPTIONS[i].option == getRepet) {
+                repeatType = MODAL_OPTIONS[i].id;
+            }
+        }
+
+        const reminderToUpdate = {
+            ...itemToUpdate,
+            reminderDate: date,
+            reminderHour: getReminder,
+            repeatType: repeatType,
+            object: {
+                ...itemToUpdate.object,
+                user,
+            },
+            user: user
+        }
+
+        if(!validateForm()) return;
+
+        if (itemToUpdate.object.name == null || itemToUpdate.object.name == '') {
+            return navigation.navigate('Exception', {
+                navigateTo: 'Schedule',
+                user
+            });
+
+        } else if (getReminder == null || getReminder == '') {
+            return formIncomplete();
+
+        } else if (getRepet == null || getRepet == '') {
+            return formIncomplete();
+        }
+
+        const res = await updateUserReminder(reminderToUpdate);
+
+        if (res == httpStatus.SERVER_ERROR) {
+            return navigation.navigate('Exception', {
+                navigateTo: 'Schedule',
+                user
+            });
+        }
+
+        return navigation.goBack();
+    }
+
+    async function handleAddReminder() {
+        let repeatType = 0;
+        for (let i in MODAL_OPTIONS) {
+            if (MODAL_OPTIONS[i].option == getRepet) {
+                repeatType = MODAL_OPTIONS[i].id;
+            }
+        }
+
+        const reminderToSave = {
+            id: uuid(),
+            reminderDate: getSelectedDate,
+            reminderHour: getReminder,
+            repeatType: repeatType,
+            object: {
+                ...item,
+                user
+            },
+            user
+        }
+
+        if(!validateForm()) return;
+
+        const res = await createReminder(reminderToSave);
+
+        if (res.status == httpStatus.SERVER_ERROR) {
+            return navigation.navigate('Exception', { user });
+        }
+
+        return navigation.goBack();
+    }
 
     function validateReminder(value) {
         setReminder(value);
@@ -149,13 +230,13 @@ export default function NewReminder({ navigation, route }) {
     const renderClickableInput = () => {
         return (
             <TouchableOpacity
-                onPress={ () => { navigation.navigate("listOfObjects") } }
+                onPress={ () => { navigation.navigate("listOfObjects", { user }) } }
             >
                 <View pointerEvents={true}>
                     <TextInput
                         value={ item ? item.name : ""}
                         onFocus={() => onFocus('Nome')}
-                        onBlur={() => onBlur('Nome', item.name)}
+                        onBlur={() => onBlur('Nome', item.object.name)}
                         selectionColor={COLORS.black}
                         style={{
                             borderColor: getObjectNameInputStyle.borderColor
@@ -179,18 +260,21 @@ export default function NewReminder({ navigation, route }) {
     const renderForm = () => {
         return(
             <View style={{ flex: 1 }}>
+                <StatusBar barStyle="light-content" />
                 {
                     disableInput ?
                     <View  style={{ marginTop: 25 }}>
-                        <TextInput
-                            value={itemToUpdate.name}
-                            onFocus={() => onFocus('Nome')}
-                            onBlur={() => onBlur('Nome', item.name)}
-                            selectionColor={COLORS.black}
-                            style={{
-                                borderColor: getObjectNameInputStyle.borderColor
-                            }}
-                        />
+                        <View pointerEvents={true}>
+                            <TextInput
+                                value={itemToUpdate.object.name}
+                                onFocus={() => onFocus('Nome')}
+                                onBlur={() => onBlur('Nome', itemToUpdate.object.name)}
+                                selectionColor={COLORS.black}
+                                style={{
+                                    borderColor: getObjectNameInputStyle.borderColor
+                                }}
+                            />
+                        </View>
                         <Placeholder>
                             <Text style={{
                                 color: getObjectNameInputStyle.color,
@@ -198,7 +282,7 @@ export default function NewReminder({ navigation, route }) {
                                 fontSize: getObjectNameInputStyle.fontSize,
                                 fontWeight: getObjectNameInputStyle.fontWeight,
                             }}>
-                                Selecione um objeto
+                                Objeto selecionado
                             </Text>
                         </Placeholder>
                     </View>
@@ -296,6 +380,8 @@ export default function NewReminder({ navigation, route }) {
                                             </TouchableOpacity>
                                         );
                                     }}
+                                    keyExtractor={ item => item.id.toString() }
+                                    showsVerticalScrollIndicator={false}
                                 />
 
                                 </View>
@@ -311,11 +397,12 @@ export default function NewReminder({ navigation, route }) {
                     justifyContent: 'space-between',
                 }}>
                     <Button
-                        text={buttonTitleFormatted}
-                        navigation={navigation}
-                        route="Home"
-                        // functionality={ () => itemToUpdate ? handleUpdateItem() : handleAddReminder() }
-                    />
+                        onPress={ () => { itemToUpdate ? handleUpdateItem() : handleAddReminder() }}
+                    >
+                        <Text style={{ ...FONTS.buttons, fontWeight: 'bold', textAlign: 'center' }}>
+                            {buttonTitleFormatted}
+                        </Text>
+                    </Button>
 
                     <CancelButton
                         onPress={ () => { navigation.goBack() }}

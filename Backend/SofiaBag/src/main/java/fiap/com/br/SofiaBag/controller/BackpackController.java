@@ -2,7 +2,6 @@ package fiap.com.br.SofiaBag.controller;
 
 import fiap.com.br.SofiaBag.dto.request.ObjectDTO;
 import fiap.com.br.SofiaBag.dto.response.MessageResponseDTO;
-import fiap.com.br.SofiaBag.exception.object.UserObjectNotFoundException;
 import fiap.com.br.SofiaBag.service.ObjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +12,10 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/object")
+@CrossOrigin(origins = "*")
+@RequestMapping("api/v1/backpack")
 @AllArgsConstructor(onConstructor = @__( @Autowired ))
-public class ObjectController {
+public class BackpackController {
 
     private ObjectService objectService;
 
