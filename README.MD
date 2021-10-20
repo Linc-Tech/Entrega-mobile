@@ -1,6 +1,6 @@
 # Guia de instalação
 
-Em primeiro lugar, é importante ressaltar que o aplicativo não está rodando corretamento quando usado no emulador Android. Pensando nisso, aconselhámos que execute a aplicação no emulador do Xcode (Iphone). Caso não seja possível, você consegue visualizar o vídeo do entregável funcionando no final desse guia. 😊
+Em primeiro lugar, é importante ressaltar que o aplicativo não está rodando corretamento quando usado no emulador Android. Pensando nisso, aconselhamos que execute a aplicação no emulador do Xcode (Iphone). Caso não seja possível, você consegue visualizar o vídeo do entregável funcionando no final desse guia. 😊
 
 
 ## Uso
